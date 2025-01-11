@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "f822b508-451d-47e1-b0b0-393a9f1b035f",
+		"name": "ApiTaskDrama",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22743760"
+	},
+	"item": [
+		{
+			"name": "Test",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "Registro",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dramataskapi.helioho.st/public/api/auth/registro",
+					"protocol": "https",
+					"host": [
+						"dramataskapi",
+						"helioho",
+						"st"
+					],
+					"path": [
+						"public",
+						"api",
+						"auth",
+						"registro"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"dreureka@test.com\",\r\n    \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dramataskapi.helioho.st/public/api/auth/login",
+					"protocol": "https",
+					"host": [
+						"dramataskapi",
+						"helioho",
+						"st"
+					],
+					"path": [
+						"public",
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "AuthPerfil",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RyYW1hdGFza2FwaS5oZWxpb2hvLnN0L3B1YmxpYy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTczNjU3MTgwOSwiZXhwIjoxNzM2NTc1NDA5LCJuYmYiOjE3MzY1NzE4MDksImp0aSI6IkNucGJJTWMwbGo4UkQ4eTUiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.G5xJmHCgwFWIs56k8JdZutukOD4HYrCimtUKf7L3vx8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://dramataskapi.helioho.st/public/api/auth/perfil",
+					"protocol": "https",
+					"host": [
+						"dramataskapi",
+						"helioho",
+						"st"
+					],
+					"path": [
+						"public",
+						"api",
+						"auth",
+						"perfil"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RyYW1hdGFza2FwaS5oZWxpb2hvLnN0L3B1YmxpYy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTczNjU3MTgwOSwiZXhwIjoxNzM2NTc1NDA5LCJuYmYiOjE3MzY1NzE4MDksImp0aSI6IkNucGJJTWMwbGo4UkQ4eTUiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.G5xJmHCgwFWIs56k8JdZutukOD4HYrCimtUKf7L3vx8",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://dramataskapi.helioho.st/public/api/auth/logout",
+					"protocol": "https",
+					"host": [
+						"dramataskapi",
+						"helioho",
+						"st"
+					],
+					"path": [
+						"public",
+						"api",
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RefreshToken",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RyYW1hdGFza2FwaS5oZWxpb2hvLnN0L3B1YmxpYy9hcGkvYXV0aC9sb2dpbiIsImlhdCI6MTczNjU3Mjc1MywiZXhwIjoxNzM2NTc2MzUzLCJuYmYiOjE3MzY1NzI3NTMsImp0aSI6Ik1jRzhyWHhaRjF0eW15UjkiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.AjUN_c1XYG6qg8mBqEaEYp1hgKibZvYMwHk0za1tOuA",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "https://dramataskapi.helioho.st/public/api/auth/refresh",
+					"protocol": "https",
+					"host": [
+						"dramataskapi",
+						"helioho",
+						"st"
+					],
+					"path": [
+						"public",
+						"api",
+						"auth",
+						"refresh"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
