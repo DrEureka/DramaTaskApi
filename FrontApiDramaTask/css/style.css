@@ -398,3 +398,41 @@ button:disabled {
     font-size: 0.8125rem;
   }
 }
+
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 15px 0;
+  z-index: 1000;
+}
+
+.footer .credits {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.footer a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  font-weight: 500;
+}
+
+.footer a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+body {
+  margin-bottom: 60px; 
+}
+
+#mainContent {
+  padding-bottom: 70px; 
+}
