@@ -60,5 +60,20 @@ class TaskTest extends TestCase
         $response->assertStatus(400);
     }
 
+    /**
+     * Test para obtener una tarea inexistente.
+     * Este test verifica que la API devuelve un error 404 cuando se intenta obtener una tarea que no existe.
+     */
+    public function test_task_not_found()
+    {
+        // Crea un usuario y lo autentica
+        $user = User::factory()->create();
+        $this->actingAs($user, 'api');
 
+        // Envía una solicitud GET para obtener una tarea con un ID inexistente
+        $response = $this->getJson('/api/tasks/999');
+
+        // Verifica que la respuesta tenga un estado 404 (no encontrado)
+        $response->assertStatus(404);
+    }
 }
