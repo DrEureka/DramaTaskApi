@@ -2,6 +2,7 @@ const API_BASE_URL = "https://dramataskapi.helioho.st/public/api";
 let token = sessionStorage.getItem("token");
 let currentUser = null;
 let isSubmitting = false;
+let currentTasks = [];
 
 // Configuración de Axios
 const api = axios.create({
@@ -41,6 +42,24 @@ elements.taskForm?.addEventListener("submit", handleTaskSubmit);
 elements.logoutBtn?.addEventListener("click", handleLogout);
 elements.registerLink?.addEventListener("click", () => showRegisterForm());
 elements.loginLink?.addEventListener("click", () => showLoginForm());
+
+const statusFilter = document.getElementById("status-filter");
+if (statusFilter) {
+  statusFilter.addEventListener("change", handleStatusFilter);
+}
+
+// Event listener para el formulario de cambio de estado
+const statusForm = document.getElementById("status-form");
+if (statusForm) {
+  statusForm.addEventListener("submit", updateTaskStatus);
+}
+
+// Verificar autenticación
+if (token) {
+  checkAuth();
+} else {
+  showLoginForm();
+}
 
 // Función para actualizar la fecha y hora
 function updateDateTime() {
@@ -204,6 +223,14 @@ async function handleLogin(e) {
   }
 }
 
+// Manejar las traducciones de errores
+const errorTranslations = {
+  "The password field confirmation does not match.":
+    "La confirmación de la contraseña no coincide.",
+  "The email has already been taken.":
+    "El correo electrónico ya ha sido registrado.",
+};
+
 // Función para manejar el registro de nuevos usuarios
 async function handleRegister(e) {
   e.preventDefault();
@@ -219,7 +246,14 @@ async function handleRegister(e) {
     return;
   }
 
+  const registerButton = e.target.querySelector('button[type="submit"]');
+  const originalText = registerButton.innerHTML;
+
   try {
+    registerButton.disabled = true;
+    registerButton.innerHTML =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registrando...';
+
     const response = await api.post("/auth/registro", {
       nombre: document.getElementById("register-name").value,
       email: document.getElementById("register-email").value,
@@ -241,12 +275,29 @@ async function handleRegister(e) {
     }
   } catch (error) {
     console.error("Register error:", error);
-    // Mostrar mensaje de error con SweetAlert
-    Swal.fire({
-      icon: "error",
-      title: "Error de Registro",
-      text: error.response?.data?.mensaje || "Error en el registro",
-    });
+    // Procesar y mostrar mensajes de error específicos
+    if (error.response && error.response.data && error.response.data.errores) {
+      const errores = error.response.data.errores;
+      const mensajes = Object.values(errores)
+        .flat()
+        .map((msg) => errorTranslations[msg] || msg) // Traducir mensajes de error
+        .join("\n");
+      Swal.fire({
+        icon: "error",
+        title: "Error de Registro",
+        text: mensajes,
+      });
+    } else {
+      // Mostrar mensaje de error genérico con SweetAlert
+      Swal.fire({
+        icon: "error",
+        title: "Error de Registro",
+        text: error.response?.data?.mensaje || "Error en el registro",
+      });
+    }
+  } finally {
+    registerButton.disabled = false;
+    registerButton.innerHTML = originalText;
   }
 }
 
@@ -269,26 +320,28 @@ async function handleLogout() {
 
 // Función para obtener las tareas
 async function fetchTasks(page = 1) {
-  showSkeletonCards(); // Muestra skeletons antes de la solicitud
+  showSkeletonCards();
   try {
     const response = await api.get(`/tasks?page=${page}`);
-    console.log("API Response:", response.data); // Log para verificar la respuesta de la API
     if (response.data && response.data.data) {
-      // Verifica que response.data.data exista
       displayTasks(response.data);
     } else {
       elements.taskList.innerHTML =
-        '<div class="col-12 text-center">No existen tareas disponibles.</div>';
+        '<div class="col-12 text-center">No hay tareas disponibles.</div>';
     }
   } catch (error) {
     console.error("Error fetching tasks:", error);
     if (error.response?.status === 401) {
       handleLogout();
     } else {
-      alert("Error loading tasks");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al cargar las tareas",
+      });
     }
   } finally {
-    hideSkeletonCards(); // Oculta skeletons después de la solicitud
+    hideSkeletonCards();
   }
 }
 
@@ -415,17 +468,24 @@ function displayTasks(response) {
   if (!elements.taskList) return;
 
   const tasks = response.data || [];
-  console.log("Tasks:", tasks); // Log para verificar las tareas
+  currentTasks = tasks; // Guardar las tareas actuales
+
+  const statusFilter = document.getElementById("status-filter").value;
+  const filteredTasks = filterTasks(tasks, statusFilter);
 
   elements.taskList.innerHTML = "";
 
-  if (tasks.length === 0) {
-    elements.taskList.innerHTML =
-      '<div class="col-12 text-center">No hay tareas disponibles.</div>';
+  if (filteredTasks.length === 0) {
+    elements.taskList.innerHTML = `
+          <div class="col-12 text-center">
+              <p class="text-muted">No hay tareas ${
+                statusFilter !== "todos" ? "con este estado" : "disponibles"
+              }.</p>
+          </div>`;
     return;
   }
 
-  tasks.forEach((task) => {
+  filteredTasks.forEach((task) => {
     const taskElement = createTaskElement(task);
     elements.taskList.appendChild(taskElement);
   });
@@ -778,3 +838,34 @@ async function updateTaskStatus(e) {
 document
   .getElementById("status-form")
   ?.addEventListener("submit", updateTaskStatus);
+
+// Función para filtrar tareas
+function filterTasks(tasks, statusFilter) {
+  if (statusFilter === "todos") {
+    return tasks;
+  }
+  return tasks.filter((task) => task.status === statusFilter);
+}
+
+// Función para manejar el cambio en el filtro
+function handleStatusFilter(e) {
+  const statusFilter = e.target.value;
+  const filteredTasks = filterTasks(currentTasks, statusFilter);
+
+  elements.taskList.innerHTML = "";
+
+  if (filteredTasks.length === 0) {
+    elements.taskList.innerHTML = `
+          <div class="col-12 text-center">
+              <p class="text-muted">No hay tareas ${
+                statusFilter !== "todos" ? "con este estado" : "disponibles"
+              }.</p>
+          </div>`;
+    return;
+  }
+
+  filteredTasks.forEach((task) => {
+    const taskElement = createTaskElement(task);
+    elements.taskList.appendChild(taskElement);
+  });
+}

@@ -32,6 +32,7 @@ body {
 
 .card:hover {
   transform: translateY(-5px);
+  transform: translateY(-5px);
 }
 
 .status-badge {
@@ -175,10 +176,11 @@ button:disabled {
   color: #333;
 }
 
-/* Estilo para la fecha y hora */
-.datetime {
-  font-size: 0.9rem;
-  color: #666;
+/* Ajustes responsive para el nombre de usuario */
+@media (max-width: 575.98px) {
+  .username {
+    font-size: 12px;
+  }
 }
 
 /* Animación para el botón de guardar */
@@ -251,4 +253,148 @@ button:disabled {
 #status-select {
   font-size: 1rem;
   padding: 8px 12px;
+}
+
+/* Estilos para el filtro de estado */
+#status-filter {
+  min-width: 150px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  padding: 0.375rem 2.25rem 0.375rem 0.75rem;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+#status-filter:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.d-flex.gap-2 {
+  align-items: center;
+}
+
+.search-filter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+/* Contenedor del formulario de búsqueda */
+.search-container {
+  flex: 1;
+  min-width: 0;
+  /* Importante para evitar desbordamiento */
+}
+
+/* Formulario de búsqueda */
+#search-form {
+  width: 100%;
+}
+
+/* Input de búsqueda */
+#search-input {
+  min-width: 0;
+  /* Importante para evitar desbordamiento */
+  flex: 1;
+}
+
+/* Contenedor del filtro */
+.filter-container {
+  width: 100%;
+}
+
+/* Select de filtro */
+#status-filter {
+  width: 100%;
+  min-width: 150px;
+}
+
+/* Media queries para diferentes tamaños de pantalla */
+@media (min-width: 576px) {
+  .search-filter-container {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .search-container {
+    margin-right: 1rem;
+  }
+
+  .filter-container {
+    width: auto;
+  }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 425px) {
+  #search-form .btn {
+    padding: 0.375rem 0.75rem;
+  }
+
+  #search-form .btn i {
+    font-size: 0.875rem;
+  }
+
+  #search-input {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+
+  #status-filter {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+  }
+}
+
+
+@media (min-width: 992px) {
+  .btn-primary.tarea {
+    margin-top: 1rem;
+    /* Eliminar margen superior en pantallas grandes */
+  }
+}
+
+/* Estilos adicionales para mejorar la visualización */
+.btn {
+  white-space: nowrap;
+}
+
+.form-control:focus,
+.form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #86b7fe;
+}
+
+/* Mejorar la visualización en dispositivos móviles */
+@media (max-width: 768px) {
+  .search-filter-container {
+    gap: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.375rem 0.75rem;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Ajustes para dispositivos muy pequeños */
+@media (max-width: 320px) {
+  #search-form .btn {
+    padding: 0.25rem 0.5rem;
+  }
+
+  #search-input,
+  #status-filter {
+    font-size: 0.8125rem;
+  }
+
+  .btn {
+    font-size: 0.8125rem;
+  }
 }
