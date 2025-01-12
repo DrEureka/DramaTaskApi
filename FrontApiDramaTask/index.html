@@ -172,6 +172,56 @@
       </div>
     </div>
 
+    <!-- Modal para Cambio de Estado -->
+    <div
+      class="modal fade"
+      id="statusModal"
+      tabindex="-1"
+      aria-labelledby="statusModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="statusModalLabel">
+              Cambiar Estado de la Tarea
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="status-form">
+              <input type="hidden" id="status-task-id" />
+              <div class="mb-3">
+                <label for="status-select" class="form-label">Estado</label>
+                <select class="form-control" id="status-select" required>
+                  <option value="pendiente">Pendiente</option>
+                  <option value="en progreso">En Progreso</option>
+                  <option value="completada">Completada</option>
+                </select>
+              </div>
+              <div class="modal-footer border-0 px-0 pb-0">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary">
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal de Tareas -->
     <div class="modal fade" id="taskModal" tabindex="-1">
       <div class="modal-dialog">
