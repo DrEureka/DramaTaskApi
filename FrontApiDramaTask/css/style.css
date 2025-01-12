@@ -1,0 +1,155 @@
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.ball {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.7;
+  z-index: -1;
+}
+
+.main-container {
+  min-height: 100vh;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+}
+
+.navbar {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card {
+  transition: transform 0.2s;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.status-badge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+}
+
+.status-pendiente {
+  background-color: #ffd700;
+  color: #000;
+}
+
+.status-en-progreso {
+  background-color: #00bcd4;
+  color: #fff;
+}
+
+.status-completada {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.task-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.auth-link {
+  cursor: pointer;
+  color: #0d6efd;
+  text-decoration: underline;
+}
+
+.form-error {
+  font-size: 0.875em;
+  margin-top: 0.25em;
+}
+
+.skeleton-card {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  padding: 20px;
+  width: 100%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: #e0e0e0;
+  }
+  50% {
+    background-color: #f5f5f5;
+  }
+  100% {
+    background-color: #e0e0e0;
+  }
+}
+
+.skeleton-title,
+.skeleton-text,
+.skeleton-badge,
+.skeleton-button {
+  background-color: #d0d0d0;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.skeleton-title {
+  height: 20px;
+  width: 70%;
+}
+
+.skeleton-text {
+  height: 15px;
+  width: 90%;
+}
+
+.skeleton-badge {
+  height: 25px;
+  width: 50px;
+}
+
+.skeleton-button {
+  height: 30px;
+  width: 100px;
+}
+/* Estilos para el botón de carga */
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+  position: relative;
+}
+
+.loading::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  margin-left: -8px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  border-top-color: transparent;
+  animation: spinner 0.6s linear infinite;
+}
+
+/* Animación del spinner */
+@keyframes spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
