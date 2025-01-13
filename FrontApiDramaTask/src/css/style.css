@@ -430,9 +430,17 @@ button:disabled {
 }
 
 body {
-  margin-bottom: 60px; 
+  margin-bottom: 60px;
 }
 
 #mainContent {
-  padding-bottom: 70px; 
+  padding-bottom: 70px;
+}
+
+/* Contenedor de botones dentro de la card */
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
