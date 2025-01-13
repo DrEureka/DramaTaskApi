@@ -444,3 +444,9 @@ body {
   gap: 0.5rem;
   margin-top: 1rem;
 }
+
+.bg-info {
+  --bs-bg-opacity: 1;
+  background-color: #065279 !important; 
+  color: #ffffff !important;
+}

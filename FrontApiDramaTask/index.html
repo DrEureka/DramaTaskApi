@@ -159,16 +159,23 @@
                   class="form-control"
                   placeholder="Buscar tareas..."
                 />
-                <button type="submit" class="btn btn-outline-primary ms-2">
+                <button
+                  type="submit"
+                  class="btn btn-outline-primary ms-2"
+                  aria-label="Buscar"
+                >
                   <i class="fas fa-search"></i>
+                  <span class="visually-hidden">Buscar</span>
                 </button>
                 <button
                   type="button"
                   id="clear-search"
                   class="btn btn-outline-secondary ms-2"
                   style="display: none"
+                  aria-label="Limpiar busqueda"
                 >
                   <i class="fas fa-times"></i>
+                  <span class="visually-hidden">Limpiar busqueda</span>
                 </button>
               </form>
             </div>
