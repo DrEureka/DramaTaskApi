@@ -1,6 +1,8 @@
 const API_BASE_URL = "https://dramataskapi.helioho.st/public/api";
 let token = sessionStorage.getItem("token");
 let currentUser = null;
+let isSubmitting = false;
+let currentTasks = [];
 
 // Configuración de Axios
 const api = axios.create({
@@ -40,6 +42,24 @@ elements.taskForm?.addEventListener("submit", handleTaskSubmit);
 elements.logoutBtn?.addEventListener("click", handleLogout);
 elements.registerLink?.addEventListener("click", () => showRegisterForm());
 elements.loginLink?.addEventListener("click", () => showLoginForm());
+
+const statusFilter = document.getElementById("status-filter");
+if (statusFilter) {
+  statusFilter.addEventListener("change", handleStatusFilter);
+}
+
+// Event listener para el formulario de cambio de estado
+const statusForm = document.getElementById("status-form");
+if (statusForm) {
+  statusForm.addEventListener("submit", updateTaskStatus);
+}
+
+// Verificar autenticación
+if (token) {
+  checkAuth();
+} else {
+  showLoginForm();
+}
 
 // Función para actualizar la fecha y hora
 function updateDateTime() {
@@ -203,6 +223,14 @@ async function handleLogin(e) {
   }
 }
 
+// Manejar las traducciones de errores
+const errorTranslations = {
+  "The password field confirmation does not match.":
+    "La confirmación de la contraseña no coincide.",
+  "The email has already been taken.":
+    "El correo electrónico ya ha sido registrado.",
+};
+
 // Función para manejar el registro de nuevos usuarios
 async function handleRegister(e) {
   e.preventDefault();
@@ -218,7 +246,14 @@ async function handleRegister(e) {
     return;
   }
 
+  const registerButton = e.target.querySelector('button[type="submit"]');
+  const originalText = registerButton.innerHTML;
+
   try {
+    registerButton.disabled = true;
+    registerButton.innerHTML =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Registrando...';
+
     const response = await api.post("/auth/registro", {
       nombre: document.getElementById("register-name").value,
       email: document.getElementById("register-email").value,
@@ -240,12 +275,29 @@ async function handleRegister(e) {
     }
   } catch (error) {
     console.error("Register error:", error);
-    // Mostrar mensaje de error con SweetAlert
-    Swal.fire({
-      icon: "error",
-      title: "Error de Registro",
-      text: error.response?.data?.mensaje || "Error en el registro",
-    });
+    // Procesar y mostrar mensajes de error específicos
+    if (error.response && error.response.data && error.response.data.errores) {
+      const errores = error.response.data.errores;
+      const mensajes = Object.values(errores)
+        .flat()
+        .map((msg) => errorTranslations[msg] || msg) // Traducir mensajes de error
+        .join("\n");
+      Swal.fire({
+        icon: "error",
+        title: "Error de Registro",
+        text: mensajes,
+      });
+    } else {
+      // Mostrar mensaje de error genérico con SweetAlert
+      Swal.fire({
+        icon: "error",
+        title: "Error de Registro",
+        text: error.response?.data?.mensaje || "Error en el registro",
+      });
+    }
+  } finally {
+    registerButton.disabled = false;
+    registerButton.innerHTML = originalText;
   }
 }
 
@@ -268,48 +320,58 @@ async function handleLogout() {
 
 // Función para obtener las tareas
 async function fetchTasks(page = 1) {
-  showSkeletonCards(); // Muestra skeletons antes de la solicitud
+  showSkeletonCards();
   try {
     const response = await api.get(`/tasks?page=${page}`);
-    console.log("API Response:", response.data); // Log para verificar la respuesta de la API
     if (response.data && response.data.data) {
-      // Verifica que response.data.data exista
       displayTasks(response.data);
     } else {
       elements.taskList.innerHTML =
-        '<div class="col-12 text-center">No existen tareas disponibles.</div>';
+        '<div class="col-12 text-center">No hay tareas disponibles.</div>';
     }
   } catch (error) {
     console.error("Error fetching tasks:", error);
     if (error.response?.status === 401) {
       handleLogout();
     } else {
-      alert("Error loading tasks");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Error al cargar las tareas",
+      });
     }
   } finally {
-    hideSkeletonCards(); // Oculta skeletons después de la solicitud
+    hideSkeletonCards();
   }
 }
 
-// Función para manejar el envío del formulario de tareas
 async function handleTaskSubmit(e) {
   e.preventDefault();
+
+  if (isSubmitting) return; // Evitar múltiples envíos
 
   // Validar el formulario
   if (!validateTaskForm()) {
     return;
   }
 
-  const taskId = document.getElementById("task-id").value;
-
-  const taskData = {
-    title: document.getElementById("task-title").value,
-    description: document.getElementById("task-description").value,
-    status: document.getElementById("task-status").value,
-    due_date: document.getElementById("task-due-date").value,
-  };
+  const submitButton = e.target.querySelector('button[type="submit"]');
+  const originalText = submitButton.innerHTML;
 
   try {
+    isSubmitting = true;
+    submitButton.disabled = true;
+    submitButton.innerHTML =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+    const taskId = document.getElementById("task-id").value;
+    const taskData = {
+      title: document.getElementById("task-title").value,
+      description: document.getElementById("task-description").value,
+      status: document.getElementById("task-status").value,
+      due_date: document.getElementById("task-due-date").value,
+    };
+
     if (taskId) {
       await api.put(`/tasks/${taskId}`, taskData);
     } else {
@@ -320,19 +382,24 @@ async function handleTaskSubmit(e) {
     resetTaskForm();
     await fetchTasks();
 
-    // Mostrar mensaje de éxito con SweetAlert
     Swal.fire({
       icon: "success",
       title: "Tarea guardada",
       text: "La tarea se ha guardado exitosamente",
+      timer: 1500,
+      showConfirmButton: false,
     });
   } catch (error) {
     console.error("Error saving task:", error);
     Swal.fire({
       icon: "error",
       title: "Error",
-      text: error.response?.data?.mensaje || "Error saving task",
+      text: error.response?.data?.mensaje || "Error al guardar la tarea",
     });
+  } finally {
+    isSubmitting = false;
+    submitButton.disabled = false;
+    submitButton.innerHTML = originalText;
   }
 }
 
@@ -401,17 +468,24 @@ function displayTasks(response) {
   if (!elements.taskList) return;
 
   const tasks = response.data || [];
-  console.log("Tasks:", tasks); // Log para verificar las tareas
+  currentTasks = tasks; // Guardar las tareas actuales
+
+  const statusFilter = document.getElementById("status-filter").value;
+  const filteredTasks = filterTasks(tasks, statusFilter);
 
   elements.taskList.innerHTML = "";
 
-  if (tasks.length === 0) {
-    elements.taskList.innerHTML =
-      '<div class="col-12 text-center">No hay tareas disponibles.</div>';
+  if (filteredTasks.length === 0) {
+    elements.taskList.innerHTML = `
+          <div class="col-12 text-center">
+              <p class="text-muted">No hay tareas ${
+                statusFilter !== "todos" ? "con este estado" : "disponibles"
+              }.</p>
+          </div>`;
     return;
   }
 
-  tasks.forEach((task) => {
+  filteredTasks.forEach((task) => {
     const taskElement = createTaskElement(task);
     elements.taskList.appendChild(taskElement);
   });
@@ -496,39 +570,43 @@ function createTaskElement(task) {
     ? new Date(task.due_date).toLocaleDateString()
     : "Sin fecha";
   const formattedCreatedDate = new Date(task.created_at).toLocaleDateString();
-  // Mostrar botón de eliminar solo si la tarea está completada
+
   const deleteButton =
     task.status === "completada"
       ? `<button onclick="deleteTask(${task.id})" class="btn btn-sm btn-danger">
-                 <i class="fas fa-trash"></i> Eliminar
-             </button>`
+             <i class="fas fa-trash"></i> Eliminar
+         </button>`
       : "";
 
   div.innerHTML = `
-          <div class="card h-100">
-              <div class="card-header">
-                  <span class="badge ${statusClass}">${task.status}</span>
-              </div>
-              <div class="card-body">
-                  <h5 class="card-title">${escapeHtml(task.title)}</h5>
-                  <p class="card-text">${escapeHtml(task.description || "")}</p>
-                  <div class="task-dates">
-                      <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
-                      <small class="text-muted">Vence: ${formattedDueDate}</small>
-                  </div>
-              </div>
-              <div class="card-footer bg-transparent">
-                  <div class="d-flex justify-content-end gap-2">
-                      <button onclick="editTask(${
-                        task.id
-                      })" class="btn btn-sm btn-primary">
-                          <i class="fas fa-edit"></i> Editar
-                      </button>
-                      ${deleteButton}
-                  </div>
+      <div class="card h-100">
+          <div class="card-header">
+              <span class="badge ${statusClass} status-badge" 
+                    style="cursor: pointer;" 
+                    onclick="openStatusModal(${task.id}, '${task.status}')">
+                  ${task.status}
+              </span>
+          </div>
+          <div class="card-body">
+              <h5 class="card-title">${escapeHtml(task.title)}</h5>
+              <p class="card-text">${escapeHtml(task.description || "")}</p>
+              <div class="task-dates">
+                  <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
+                  <small class="text-muted">Vence: ${formattedDueDate}</small>
               </div>
           </div>
-      `;
+          <div class="card-footer bg-transparent">
+              <div class="d-flex justify-content-end gap-2">
+                  <button onclick="editTask(${
+                    task.id
+                  })" class="btn btn-sm btn-primary">
+                      <i class="fas fa-edit"></i> Editar
+                  </button>
+                  ${deleteButton}
+              </div>
+          </div>
+      </div>
+  `;
 
   return div;
 }
@@ -678,3 +756,116 @@ document.addEventListener("DOMContentLoaded", () => {
     showLoginForm();
   }
 });
+
+// Modal de estado
+const statusModal = new bootstrap.Modal(document.getElementById("statusModal"));
+
+// Función para abrir el modal de estado
+function openStatusModal(taskId, currentStatus) {
+  const statusSelect = document.getElementById("status-select");
+  const statusTaskId = document.getElementById("status-task-id");
+
+  if (statusSelect && statusTaskId) {
+    statusTaskId.value = taskId;
+    statusSelect.value = currentStatus;
+
+    const statusModal = new bootstrap.Modal(
+      document.getElementById("statusModal")
+    );
+    statusModal.show();
+  }
+}
+
+// Función para actualizar el estado
+async function updateTaskStatus(e) {
+  e.preventDefault();
+
+  const taskId = document.getElementById("status-task-id").value;
+  const submitButton = e.target.querySelector('button[type="submit"]');
+  const originalText = submitButton.innerHTML;
+
+  try {
+    submitButton.disabled = true;
+    submitButton.innerHTML =
+      '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
+
+    // Primero, obtener la tarea actual
+    const currentTaskResponse = await api.get(`/tasks/${taskId}`);
+    const currentTask = currentTaskResponse.data;
+
+    // Preparar los datos para la actualización manteniendo todos los campos requeridos
+    const updateData = {
+      title: currentTask.title,
+      description: currentTask.description || "",
+      status: document.getElementById("status-select").value,
+      due_date: currentTask.due_date ? currentTask.due_date.slice(0, 16) : null,
+    };
+
+    // Realizar la actualización
+    const response = await api.put(`/tasks/${taskId}`, updateData);
+
+    if (response.data) {
+      const statusModal = bootstrap.Modal.getInstance(
+        document.getElementById("statusModal")
+      );
+      statusModal.hide();
+      await fetchTasks();
+
+      Swal.fire({
+        icon: "success",
+        title: "Estado Actualizado",
+        text: "El estado de la tarea ha sido actualizado exitosamente",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  } catch (error) {
+    console.error("Error updating status:", error);
+    Swal.fire({
+      icon: "error",
+      title: "Error al actualizar el estado",
+      text:
+        error.response?.data?.mensaje ||
+        "Hubo un error al actualizar el estado de la tarea",
+    });
+  } finally {
+    submitButton.disabled = false;
+    submitButton.innerHTML = originalText;
+  }
+}
+
+// Agregar el event listener para el formulario de estado
+document
+  .getElementById("status-form")
+  ?.addEventListener("submit", updateTaskStatus);
+
+// Función para filtrar tareas
+function filterTasks(tasks, statusFilter) {
+  if (statusFilter === "todos") {
+    return tasks;
+  }
+  return tasks.filter((task) => task.status === statusFilter);
+}
+
+// Función para manejar el cambio en el filtro
+function handleStatusFilter(e) {
+  const statusFilter = e.target.value;
+  const filteredTasks = filterTasks(currentTasks, statusFilter);
+
+  elements.taskList.innerHTML = "";
+
+  if (filteredTasks.length === 0) {
+    elements.taskList.innerHTML = `
+          <div class="col-12 text-center">
+              <p class="text-muted">No hay tareas ${
+                statusFilter !== "todos" ? "con este estado" : "disponibles"
+              }.</p>
+          </div>`;
+    return;
+  }
+
+  filteredTasks.forEach((task) => {
+    const taskElement = createTaskElement(task);
+    elements.taskList.appendChild(taskElement);
+  });
+}
