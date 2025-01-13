@@ -3,6 +3,9 @@ let token = sessionStorage.getItem("token");
 let currentUser = null;
 let isSubmitting = false;
 let currentTasks = [];
+let sortOrder = "desc";
+let currentPage = 1;
+let currentResponse = null;
 
 // Configuración de Axios
 const api = axios.create({
@@ -158,6 +161,38 @@ function showSkeletonCards() {
         </div>
       `;
     elements.taskList.appendChild(skeletonCard);
+  }
+}
+
+// Función para ordenar las tareas por la fecha de creación
+function sortTasksByDate(tasks, order) {
+  return tasks.sort((a, b) => {
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+    return order === "asc" ? dateA - dateB : dateB - dateA;
+  });
+}
+
+// Función para manejar el clic del botón de ordenación
+document.getElementById("sort-button").addEventListener("click", () => {
+  sortOrder = sortOrder === "asc" ? "desc" : "asc";
+
+  if (currentResponse) {
+    displayTasks(currentResponse, true);
+  }
+
+  updateSortButtonIcon();
+});
+
+// Función para actualizar el icono del botón de ordenación
+function updateSortButtonIcon() {
+  const sortButtonIcon = document.querySelector("#sort-button i");
+  if (sortOrder === "asc") {
+    sortButtonIcon.classList.remove("fa-sort-down");
+    sortButtonIcon.classList.add("fa-sort-up");
+  } else {
+    sortButtonIcon.classList.remove("fa-sort-up");
+    sortButtonIcon.classList.add("fa-sort-down");
   }
 }
 
@@ -464,24 +499,28 @@ function handleError(error, title = "Error", message = "Ha ocurrido un error") {
 }
 
 // Función para mostrar las tareas
-function displayTasks(response) {
+function displayTasks(response, maintainPage = false) {
   if (!elements.taskList) return;
 
+  currentResponse = response;
   const tasks = response.data || [];
   currentTasks = tasks; // Guardar las tareas actuales
 
+  // Ordenar las tareas por fecha según el orden seleccionado
+  const sortedTasks = sortTasksByDate(tasks, sortOrder);
+
   const statusFilter = document.getElementById("status-filter").value;
-  const filteredTasks = filterTasks(tasks, statusFilter);
+  const filteredTasks = filterTasks(sortedTasks, statusFilter);
 
   elements.taskList.innerHTML = "";
 
   if (filteredTasks.length === 0) {
     elements.taskList.innerHTML = `
-          <div class="col-12 text-center">
-              <p class="text-muted">No hay tareas ${
-                statusFilter !== "todos" ? "con este estado" : "disponibles"
-              }.</p>
-          </div>`;
+      <div class="col-12 text-center">
+        <p class="text-muted">No hay tareas ${
+          statusFilter !== "todos" ? "con este estado" : "disponibles"
+        }.</p>
+      </div>`;
     return;
   }
 
@@ -492,7 +531,7 @@ function displayTasks(response) {
 
   // Agregar paginación si existe
   if (response.last_page > 1) {
-    addPaginationControls(response);
+    addPaginationControls(response, maintainPage);
   }
 }
 
@@ -638,7 +677,9 @@ function addPaginationControls(response) {
                 }); return false;">
                     ${link.label
                       .replace("&laquo;", "«")
-                      .replace("&raquo;", "»")}
+                      .replace("&raquo;", "»")
+                      .replace("Next »", "Siguiente »")
+                      .replace("« Previous", "Anterior «")}
                 </a>
             </li>
         `
@@ -850,22 +891,9 @@ function filterTasks(tasks, statusFilter) {
 // Función para manejar el cambio en el filtro
 function handleStatusFilter(e) {
   const statusFilter = e.target.value;
-  const filteredTasks = filterTasks(currentTasks, statusFilter);
-
-  elements.taskList.innerHTML = "";
-
-  if (filteredTasks.length === 0) {
-    elements.taskList.innerHTML = `
-          <div class="col-12 text-center">
-              <p class="text-muted">No hay tareas ${
-                statusFilter !== "todos" ? "con este estado" : "disponibles"
-              }.</p>
-          </div>`;
-    return;
-  }
-
-  filteredTasks.forEach((task) => {
-    const taskElement = createTaskElement(task);
-    elements.taskList.appendChild(taskElement);
-  });
+  fetchTasks(1, sortOrder, statusFilter); // Recargar las tareas con el nuevo estado
 }
+
+document
+  .getElementById("status-filter")
+  .addEventListener("change", handleStatusFilter);

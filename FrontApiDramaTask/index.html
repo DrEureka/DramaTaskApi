@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrador de Tareas - DramaTask</title>
+    <link rel="icon" type="image/x-icon" href="src/public/dramaTask.ico" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -16,7 +17,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
     />
-    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="src/css/style.css" />
   </head>
   <body>
     <!-- Navbar -->
@@ -32,10 +33,10 @@
       </div>
     </nav>
 
-    <!-- Contenedor de Login -->
+    <!-- Contenedor de Login y Registro -->
     <div id="loginForm" class="container mt-5">
       <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-5">
           <!-- Formulario de Login -->
           <div id="login-div" class="card">
             <div class="card-body">
@@ -76,67 +77,72 @@
             </div>
           </div>
 
-         <!-- Formulario de Registro -->
-<div id="register-div" class="card hidden">
-  <div class="card-body">
-    <h2 class="card-title text-center mb-4">Registrarse</h2>
-    <form id="register-form">
-      <div class="mb-3">
-        <input
-          type="text"
-          class="form-control"
-          id="register-name"
-          placeholder="Nombre"
-          required
-        />
+          <!-- Formulario de Registro -->
+          <div id="register-div" class="card hidden">
+            <div class="card-body">
+              <h2 class="card-title text-center mb-4">Registrarse</h2>
+              <form id="register-form">
+                <div class="mb-3">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="register-name"
+                    placeholder="Nombre"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="register-email"
+                    placeholder="Correo Electrónico"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="register-password"
+                    placeholder="Contraseña"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="register-password-confirmation"
+                    placeholder="Confirmar Contraseña"
+                    required
+                  />
+                </div>
+                <div class="mb-3 form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    id="show-password-register"
+                  />
+                  <label class="form-check-label" for="show-password-register">
+                    Mostrar Contraseña
+                  </label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                  Registrarse
+                </button>
+              </form>
+              <p class="text-center mt-3">
+                ¿Ya tienes una cuenta?
+                <span id="login-link" class="auth-link"
+                  >Inicia sesión aquí</span
+                >
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="mb-3">
-        <input
-          type="email"
-          class="form-control"
-          id="register-email"
-          placeholder="Correo Electrónico"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <input
-          type="password"
-          class="form-control"
-          id="register-password"
-          placeholder="Contraseña"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <input
-          type="password"
-          class="form-control"
-          id="register-password-confirmation"
-          placeholder="Confirmar Contraseña"
-          required
-        />
-      </div>
-      <div class="mb-3 form-check">
-        <input
-          type="checkbox"
-          class="form-check-input"
-          id="show-password-register"
-        />
-        <label class="form-check-label" for="show-password-register">
-          Mostrar Contraseña
-        </label>
-      </div>
-      <button type="submit" class="btn btn-primary w-100">
-        Registrarse
-      </button>
-    </form>
-    <p class="text-center mt-3">
-      ¿Ya tienes una cuenta?
-      <span id="login-link" class="auth-link">Inicia sesión aquí</span>
-    </p>
-  </div>
-</div>
+    </div>
 
     <!-- Contenido Principal -->
     <div id="mainContent" class="container mt-4 hidden">
@@ -153,28 +159,38 @@
                   class="form-control"
                   placeholder="Buscar tareas..."
                 />
-                <button type="submit" class="btn btn-outline-primary ms-2">
+                <button
+                  type="submit"
+                  class="btn btn-outline-primary ms-2"
+                  aria-label="Buscar"
+                >
                   <i class="fas fa-search"></i>
+                  <span class="visually-hidden">Buscar</span>
                 </button>
                 <button
                   type="button"
                   id="clear-search"
                   class="btn btn-outline-secondary ms-2"
                   style="display: none"
+                  aria-label="Limpiar busqueda"
                 >
                   <i class="fas fa-times"></i>
+                  <span class="visually-hidden">Limpiar busqueda</span>
                 </button>
               </form>
             </div>
 
             <!-- Filtro de estado -->
-            <div class="filter-container">
-              <select id="status-filter" class="form-select">
+            <div class="filter-container d-flex align-items-center">
+              <select id="status-filter" class="form-select me-2">
                 <option value="todos">Todas las tareas</option>
                 <option value="pendiente">Pendientes</option>
                 <option value="en progreso">En Progreso</option>
                 <option value="completada">Completadas</option>
               </select>
+              <button id="sort-button" class="btn btn-outline-primary">
+                <i class="fas fa-sort"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -354,33 +370,49 @@
       </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Animación de Fondo -->
-    <script src="./js/animacion.js"></script>
-    <!-- Script Principal de la Aplicación -->
-    <script src="./js/app.js"></script>
-        <!-- Script Contraseña -->
-        <script src="./js/contra.js"></script>
+    <!-- Animacion -->
+    <script src="src/js/animacion.js"></script>
 
-         <!-- Footer  -->
-         <footer class="footer w-100">
-          <div class="container-fluid">
-            <div class="row">
-              <div class="col-12 text-center">
-                <p class="credits">
-                  ✨ Desarrollado por 
-                  <a href="https://github.com/DrEureka/" target="_blank">
-                    Dramadan
-                  </a>
-                  - <strong>2025</strong>
-                </p>
-              </div>
-            </div>
+    <!-- Utilities -->
+    <script src="src/js/utils/status.js"></script>
+    <script src="src/js/utils/search.js"></script>
+    <script src="src/js/utils/Utils.js"></script>
+    <script src="src/js/utils/ui.js"></script>
+
+    <!-- API Configuration -->
+    <script src="src/js/api/api.js"></script>
+
+    <!-- Authentication -->
+    <script src="src/js/auth/auth.js"></script>
+
+    <!-- Tasks -->
+    <script src="src/js/tasks/tasks.js"></script>
+
+    <!-- Core -->
+    <script src="src/js/main.js"></script>
+    <script src="src/js/contra.js"></script>
+    <script src="src/js/events.js"></script>
+
+    <!-- Footer -->
+    <footer class="footer w-100">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12 text-center">
+            <p class="credits">
+              ✨ Desarrollado por
+              <a href="https://github.com/DrEureka/" target="_blank">
+                Dramadan
+              </a>
+              - <strong>2025</strong>
+            </p>
           </div>
-        </footer>
-
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
