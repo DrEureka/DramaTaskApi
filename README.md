@@ -19,8 +19,8 @@ Sistema de gestión de tareas que proporciona una API RESTful con Laravel y una 
 - `POST /api/auth/logout`: (Solo encabezado de autorización)
 - `POST /api/auth/refresh`: (Solo encabezado de autorización)
 - `GET /api/auth/perfil`: (Solo encabezado de autorización)
-- `GET /api/auth/email/verify/{id}/{hash}`: (Solo encabezado de autorización)
-- `POST /api/auth/password/reset`: email
+- `GET /api/auth/email/verify/{id}/{hash}`: (Solo encabezado de autorización) (Proximamente)
+- `POST /api/auth/password/reset`: email  (Proximamente)
 
 **Tareas:**
 - `GET /api/tasks`: (Solo encabezado de autorización)
@@ -33,7 +33,7 @@ Sistema de gestión de tareas que proporciona una API RESTful con Laravel y una 
 ## 🛠️ Tecnologías
 
 **Backend:**
-- Laravel 10.x
+- Laravel 10.x+
 - PHP 8.1+
 - MySQL/PostgreSQL
 - JWT Authentication
