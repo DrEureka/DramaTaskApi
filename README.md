@@ -67,7 +67,7 @@ Sistema de gestión de tareas que proporciona una API RESTful con Laravel y una 
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](LICENSE.md) para más detalles.
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE.md](https://github.com/DrEureka/DramaTaskApi/blob/Main/LICENSE) para más detalles.
 
 ## ✨ Créditos
 
