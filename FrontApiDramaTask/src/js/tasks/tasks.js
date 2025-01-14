@@ -86,7 +86,7 @@ async function handleTaskSubmit(e) {
       title: document.getElementById("task-title").value,
       description: document.getElementById("task-description").value,
       status: document.getElementById("task-status").value,
-      due_date: document.getElementById("task-due-date").value,
+      due_date: document.getElementById("task-due-date").value, // Solo fecha YYYY-MM-DD
     };
 
     if (taskId) {
@@ -159,9 +159,15 @@ async function editTask(taskId) {
     document.getElementById("task-title").value = task.title;
     document.getElementById("task-description").value = task.description || "";
     document.getElementById("task-status").value = task.status;
-    document.getElementById("task-due-date").value = task.due_date
-      ? task.due_date.slice(0, 16)
-      : "";
+
+    // Formatear solo la fecha para el input date
+    if (task.due_date) {
+      const dueDate = new Date(task.due_date);
+      const formattedDate = dueDate.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+      document.getElementById("task-due-date").value = formattedDate;
+    } else {
+      document.getElementById("task-due-date").value = "";
+    }
 
     elements.taskModal.show();
   } catch (error) {
@@ -279,11 +285,7 @@ function createTaskElement(task) {
   function formatDueDate(dateString) {
     if (!dateString) return "Sin fecha";
 
-    // Convertimos la fecha UTC a objeto Date
     const date = new Date(dateString);
-
-    // Aseguramos que estamos usando la fecha exacta de la API
-    // sin ajustes de zona horaria
     const year = date.getUTCFullYear();
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const day = String(date.getUTCDate()).padStart(2, "0");
@@ -306,9 +308,6 @@ function createTaskElement(task) {
   // Usamos las nuevas funciones de formateo
   const formattedDueDate = formatDueDate(task.due_date);
   const formattedCreatedDate = formatCreatedDate(task.created_at);
-
-  console.log("API due_date:", task.due_date); // Para debugging
-  console.log("Formatted due_date:", formattedDueDate); // Para debugging
 
   const deleteButton =
     task.status === "completada"
