@@ -12,7 +12,7 @@ async function fetchTasks(page = 1) {
     if (response.data && response.data.data) {
       displayTasks(response.data);
     } else {
-      elements.taskList.innerHTML = 
+      elements.taskList.innerHTML =
         '<div class="col-12 text-center">No hay tareas disponibles.</div>';
     }
   } catch (error) {
@@ -66,7 +66,7 @@ function displayTasks(response, maintainPage = false) {
 // Función para manejar el envío del formulario de tareas
 async function handleTaskSubmit(e) {
   e.preventDefault();
-  if (isSubmitting) return; 
+  if (isSubmitting) return;
 
   if (!validateTaskForm()) {
     return;
@@ -78,7 +78,7 @@ async function handleTaskSubmit(e) {
   try {
     isSubmitting = true;
     submitButton.disabled = true;
-    submitButton.innerHTML = 
+    submitButton.innerHTML =
       '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
     const taskId = document.getElementById("task-id").value;
@@ -180,18 +180,24 @@ function validateTaskForm() {
   let isValid = true;
   const errors = {};
 
+  // Tomar la fecha/hora local actual del navegador
+  const nowLocal = new Date();
+
+  // Título: entre 3 y 100 caracteres
   if (title.length < 3 || title.length > 100) {
     isValid = false;
     errors.title =
       "El título es requerido y debe tener entre 3 y 100 caracteres.";
   }
 
+  // Descripción: máximo 255 caracteres
   if (description.length > 255) {
     isValid = false;
     errors.description =
       "La descripción puede tener un máximo de 255 caracteres.";
   }
 
+  // Estado: pendiente, en progreso o completada
   const validStatuses = ["pendiente", "en progreso", "completada"];
   if (!validStatuses.includes(status)) {
     isValid = false;
@@ -199,7 +205,8 @@ function validateTaskForm() {
       "El estado es requerido y debe ser uno de: pendiente, en progreso, completada.";
   }
 
-  if (dueDate && new Date(dueDate) <= new Date()) {
+  // Validar que la fecha de vencimiento sea futura (comparada con "nowLocal")
+  if (dueDate && new Date(dueDate) <= nowLocal) {
     isValid = false;
     errors.dueDate = "La fecha de vencimiento debe ser una fecha futura.";
   }
@@ -207,7 +214,6 @@ function validateTaskForm() {
   displayValidationErrors(errors);
   return isValid;
 }
-
 // Función para mostrar mensajes de error de validación
 function displayValidationErrors(errors) {
   const errorElements = document.querySelectorAll(".form-error");
@@ -217,7 +223,8 @@ function displayValidationErrors(errors) {
     document.getElementById("task-title-error").textContent = errors.title;
   }
   if (errors.description) {
-    document.getElementById("task-description-error").textContent = errors.description;
+    document.getElementById("task-description-error").textContent =
+      errors.description;
   }
   if (errors.status) {
     document.getElementById("task-status-error").textContent = errors.status;
@@ -328,9 +335,13 @@ function addPaginationControls(response) {
       ${response.links
         .map(
           (link) => `
-            <li class="page-item ${link.active ? "active" : ""} ${!link.url ? "disabled" : ""}">
+            <li class="page-item ${link.active ? "active" : ""} ${
+            !link.url ? "disabled" : ""
+          }">
               <a class="page-link" href="#" 
-                 onclick="fetchTasks(${link.url ? link.url.split("page=")[1] : "1"}); return false;">
+                 onclick="fetchTasks(${
+                   link.url ? link.url.split("page=")[1] : "1"
+                 }); return false;">
                 ${link.label
                   .replace("&laquo;", "«")
                   .replace("&raquo;", "»")
