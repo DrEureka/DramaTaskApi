@@ -309,6 +309,9 @@ function createTaskElement(task) {
   const formattedDueDate = formatDueDate(task.due_date);
   const formattedCreatedDate = formatCreatedDate(task.created_at);
 
+  // Obtener la clase CSS según la fecha de vencimiento
+  const dueDateClass = getDueDateClass(task.due_date);
+
   const deleteButton =
     task.status === "completada"
       ? `<button onclick="deleteTask(${task.id})" class="btn btn-sm btn-danger">
@@ -330,7 +333,7 @@ function createTaskElement(task) {
               <p class="card-text">${escapeHtml(task.description || "")}</p>
               <div class="task-dates">
                   <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
-                  <small class="text-muted">Vence: ${formattedDueDate}</small>
+                  <small class="text-muted due-date ${dueDateClass}">Vence: ${formattedDueDate}</small>
               </div>
           </div>
           <div class="card-footer bg-transparent">
@@ -346,6 +349,25 @@ function createTaskElement(task) {
       </div>
   `;
   return div;
+}
+
+// Función para obtener la clase CSS según la fecha de vencimiento
+function getDueDateClass(dueDate) {
+  if (!dueDate) return "";
+
+  const dueDateTime = new Date(dueDate).getTime();
+  const now = new Date().getTime();
+  const oneDay = 24 * 60 * 60 * 1000; // Un día en milisegundos
+
+  if (dueDateTime < now) {
+    return "tarea"; // Fecha pasada
+  } else if (dueDateTime - now <= oneDay) {
+    return "tarea-muy-cerca"; // Menos de un día
+  } else if (dueDateTime - now <= 3 * oneDay) {
+    return "tarea-cerca"; // Menos de tres días
+  } else {
+    return "tarea-futura"; // Fecha lejana
+  }
 }
 
 // Función para encapsular las clases según el estado
