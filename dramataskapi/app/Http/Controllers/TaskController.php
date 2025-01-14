@@ -39,8 +39,11 @@ class TaskController extends BaseController
             });
         }
 
-        // Devuelve las tareas paginadas
-        $tasks = $query->paginate(10);
+        // Devuelve las tareas paginadas y asc.
+        $sort = $request->get('sort', 'created_at');
+        $order = $request->get('order', 'desc');
+
+        $tasks = $query->orderBy($sort, $order)->paginate(15);
 
         return response()->json($tasks, 200);
     }

@@ -86,7 +86,7 @@ async function handleTaskSubmit(e) {
       title: document.getElementById("task-title").value,
       description: document.getElementById("task-description").value,
       status: document.getElementById("task-status").value,
-      due_date: document.getElementById("task-due-date").value,
+      due_date: document.getElementById("task-due-date").value, // Solo fecha YYYY-MM-DD
     };
 
     if (taskId) {
@@ -159,9 +159,15 @@ async function editTask(taskId) {
     document.getElementById("task-title").value = task.title;
     document.getElementById("task-description").value = task.description || "";
     document.getElementById("task-status").value = task.status;
-    document.getElementById("task-due-date").value = task.due_date
-      ? task.due_date.slice(0, 16)
-      : "";
+
+    // Formatear solo la fecha para el input date
+    if (task.due_date) {
+      const dueDate = new Date(task.due_date);
+      const formattedDate = dueDate.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+      document.getElementById("task-due-date").value = formattedDate;
+    } else {
+      document.getElementById("task-due-date").value = "";
+    }
 
     elements.taskModal.show();
   } catch (error) {
@@ -274,10 +280,37 @@ function createTaskElement(task) {
   div.className = "col-md-4 mb-3";
 
   const statusClass = getStatusClass(task.status);
-  const formattedDueDate = task.due_date
-    ? new Date(task.due_date).toLocaleDateString()
-    : "Sin fecha";
-  const formattedCreatedDate = new Date(task.created_at).toLocaleDateString();
+
+  // Nueva función que respeta exactamente la fecha de la API
+  function formatDueDate(dateString) {
+    if (!dateString) return "Sin fecha";
+
+    const date = new Date(dateString);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${day}/${month}/${year}`;
+  }
+
+  // Aplicamos el mismo formato para created_at
+  function formatCreatedDate(dateString) {
+    if (!dateString) return "Sin fecha";
+
+    const date = new Date(dateString);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${day}/${month}/${year}`;
+  }
+
+  // Usamos las nuevas funciones de formateo
+  const formattedDueDate = formatDueDate(task.due_date);
+  const formattedCreatedDate = formatCreatedDate(task.created_at);
+
+  // Obtener la clase CSS según la fecha de vencimiento
+  const dueDateClass = getDueDateClass(task.due_date);
 
   const deleteButton =
     task.status === "completada"
@@ -287,33 +320,54 @@ function createTaskElement(task) {
       : "";
 
   div.innerHTML = `
-    <div class="card h-100">
-      <div class="card-header">
-        <span class="badge ${statusClass} status-badge" 
-              style="cursor: pointer;" 
-              onclick="openStatusModal(${task.id}, '${task.status}')">
-          ${task.status}
-        </span>
+      <div class="card h-100">
+          <div class="card-header">
+              <span class="badge ${statusClass} status-badge" 
+                    style="cursor: pointer;" 
+                    onclick="openStatusModal(${task.id}, '${task.status}')">
+                  ${task.status}
+              </span>
+          </div>
+          <div class="card-body">
+              <h5 class="card-title">${escapeHtml(task.title)}</h5>
+              <p class="card-text">${escapeHtml(task.description || "")}</p>
+              <div class="task-dates">
+                  <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
+                  <small class="text-muted due-date ${dueDateClass}">Vence: ${formattedDueDate}</small>
+              </div>
+          </div>
+          <div class="card-footer bg-transparent">
+              <div class="d-flex justify-content-end gap-2">
+                  <button onclick="editTask(${
+                    task.id
+                  })" class="btn btn-sm btn-primary">
+                      <i class="fas fa-edit"></i> Editar
+                  </button>
+                  ${deleteButton}
+              </div>
+          </div>
       </div>
-      <div class="card-body">
-        <h5 class="card-title">${escapeHtml(task.title)}</h5>
-        <p class="card-text">${escapeHtml(task.description || "")}</p>
-        <div class="task-dates">
-          <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
-          <small class="text-muted">Vence: ${formattedDueDate}</small>
-        </div>
-      </div>
-      <div class="card-footer bg-transparent">
-        <div class="d-flex justify-content-end gap-2">
-          <button onclick="editTask(${task.id})" class="btn btn-sm btn-primary">
-            <i class="fas fa-edit"></i> Editar
-          </button>
-          ${deleteButton}
-        </div>
-      </div>
-    </div>
   `;
   return div;
+}
+
+// Función para obtener la clase CSS según la fecha de vencimiento
+function getDueDateClass(dueDate) {
+  if (!dueDate) return "";
+
+  const dueDateTime = new Date(dueDate).getTime();
+  const now = new Date().getTime();
+  const oneDay = 24 * 60 * 60 * 1000; // Un día en milisegundos
+
+  if (dueDateTime < now) {
+    return "tarea"; // Fecha pasada
+  } else if (dueDateTime - now <= oneDay) {
+    return "tarea-muy-cerca"; // Menos de un día
+  } else if (dueDateTime - now <= 3 * oneDay) {
+    return "tarea-cerca"; // Menos de tres días
+  } else {
+    return "tarea-futura"; // Fecha lejana
+  }
 }
 
 // Función para encapsular las clases según el estado
@@ -365,8 +419,4 @@ function escapeHtml(unsafe) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-<<<<<<< HEAD
-}
-=======
 }w
->>>>>>> origin/Dev

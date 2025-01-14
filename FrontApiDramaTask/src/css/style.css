@@ -447,6 +447,26 @@ body {
 
 .bg-info {
   --bs-bg-opacity: 1;
-  background-color: #065279 !important; 
+  background-color: #065279 !important;
   color: #ffffff !important;
+}
+
+.tarea-cerca {
+  color: orange !important;
+  /* Fecha cercana */
+}
+
+.tarea-muy-cerca {
+  color: red !important;
+  /* Fecha muy cercana */
+}
+
+.tarea-pasada {
+  color: gray !important;
+  /* Fecha pasada */
+}
+
+.tarea-futura {
+  color: green !important;
+  /* Fecha futura */
 }

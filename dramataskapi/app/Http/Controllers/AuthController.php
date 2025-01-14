@@ -67,7 +67,8 @@ class AuthController extends BaseController
                 'mensaje' => 'Credenciales no válidas'
             ], 401);
         }
-
+//Guardo el ultimo login.
+        Auth::user()->actualizarUltimoLogin();
         return $this->crearRespuestaToken($token);
     }
 
