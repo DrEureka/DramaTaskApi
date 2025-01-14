@@ -121,25 +121,28 @@ async function checkAuth() {
   }
 }
 
-// Función para manejar el cierre de sesión
+// Función optimizada para manejar el cierre de sesión sin SweetAlert
 async function handleLogout() {
+  // Mostrar un mensaje de cierre de sesión (opcional)
+  console.log("Cerrando sesión...");
+
   try {
     if (token) {
+      // Realiza la solicitud de cierre de sesión al servidor
       await api.post("/auth/logout");
     }
   } catch (error) {
-    console.error("Logout error:", error);
-    Swal.fire({
-      icon: "error",
-      title: "Error de cierre de sesión",
-      text: "Hubo un error al cerrar la sesión",
-    });
+    console.error("Error al cerrar la sesión:", error);
+    // Mostrar un mensaje de error usando alert nativo
+    alert("Hubo un error al cerrar la sesión. Por favor, intenta nuevamente.");
   } finally {
+    // Limpiar la sesión del usuario
     sessionStorage.removeItem("token");
     token = null;
     currentUser = null;
     api.defaults.headers["Authorization"] = "";
     showLoginForm();
+    console.log("Sesión cerrada correctamente.");
   }
 }
 
