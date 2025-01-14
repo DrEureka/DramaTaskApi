@@ -41,7 +41,7 @@ class TaskController extends BaseController
 
         // Devuelve las tareas paginadas y asc.
         $sort = $request->get('sort', 'created_at');
-        $order = $request->get('order', 'asc');
+        $order = $request->get('order', 'desc');
 
         $tasks = $query->orderBy($sort, $order)->paginate(15);
 
