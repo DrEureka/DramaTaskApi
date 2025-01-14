@@ -12,7 +12,7 @@ async function fetchTasks(page = 1) {
     if (response.data && response.data.data) {
       displayTasks(response.data);
     } else {
-      elements.taskList.innerHTML = 
+      elements.taskList.innerHTML =
         '<div class="col-12 text-center">No hay tareas disponibles.</div>';
     }
   } catch (error) {
@@ -66,7 +66,7 @@ function displayTasks(response, maintainPage = false) {
 // Función para manejar el envío del formulario de tareas
 async function handleTaskSubmit(e) {
   e.preventDefault();
-  if (isSubmitting) return; 
+  if (isSubmitting) return;
 
   if (!validateTaskForm()) {
     return;
@@ -78,7 +78,7 @@ async function handleTaskSubmit(e) {
   try {
     isSubmitting = true;
     submitButton.disabled = true;
-    submitButton.innerHTML = 
+    submitButton.innerHTML =
       '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...';
 
     const taskId = document.getElementById("task-id").value;
@@ -180,18 +180,24 @@ function validateTaskForm() {
   let isValid = true;
   const errors = {};
 
+  // Tomar la fecha/hora local actual del navegador
+  const nowLocal = new Date();
+
+  // Título: entre 3 y 100 caracteres
   if (title.length < 3 || title.length > 100) {
     isValid = false;
     errors.title =
       "El título es requerido y debe tener entre 3 y 100 caracteres.";
   }
 
+  // Descripción: máximo 255 caracteres
   if (description.length > 255) {
     isValid = false;
     errors.description =
       "La descripción puede tener un máximo de 255 caracteres.";
   }
 
+  // Estado: pendiente, en progreso o completada
   const validStatuses = ["pendiente", "en progreso", "completada"];
   if (!validStatuses.includes(status)) {
     isValid = false;
@@ -199,7 +205,8 @@ function validateTaskForm() {
       "El estado es requerido y debe ser uno de: pendiente, en progreso, completada.";
   }
 
-  if (dueDate && new Date(dueDate) <= new Date()) {
+  // Validar que la fecha de vencimiento sea futura (comparada con "nowLocal")
+  if (dueDate && new Date(dueDate) <= nowLocal) {
     isValid = false;
     errors.dueDate = "La fecha de vencimiento debe ser una fecha futura.";
   }
@@ -207,7 +214,6 @@ function validateTaskForm() {
   displayValidationErrors(errors);
   return isValid;
 }
-
 // Función para mostrar mensajes de error de validación
 function displayValidationErrors(errors) {
   const errorElements = document.querySelectorAll(".form-error");
@@ -217,7 +223,8 @@ function displayValidationErrors(errors) {
     document.getElementById("task-title-error").textContent = errors.title;
   }
   if (errors.description) {
-    document.getElementById("task-description-error").textContent = errors.description;
+    document.getElementById("task-description-error").textContent =
+      errors.description;
   }
   if (errors.status) {
     document.getElementById("task-status-error").textContent = errors.status;
@@ -267,10 +274,41 @@ function createTaskElement(task) {
   div.className = "col-md-4 mb-3";
 
   const statusClass = getStatusClass(task.status);
-  const formattedDueDate = task.due_date
-    ? new Date(task.due_date).toLocaleDateString()
-    : "Sin fecha";
-  const formattedCreatedDate = new Date(task.created_at).toLocaleDateString();
+
+  // Nueva función que respeta exactamente la fecha de la API
+  function formatDueDate(dateString) {
+    if (!dateString) return "Sin fecha";
+
+    // Convertimos la fecha UTC a objeto Date
+    const date = new Date(dateString);
+
+    // Aseguramos que estamos usando la fecha exacta de la API
+    // sin ajustes de zona horaria
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${day}/${month}/${year}`;
+  }
+
+  // Aplicamos el mismo formato para created_at
+  function formatCreatedDate(dateString) {
+    if (!dateString) return "Sin fecha";
+
+    const date = new Date(dateString);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+
+    return `${day}/${month}/${year}`;
+  }
+
+  // Usamos las nuevas funciones de formateo
+  const formattedDueDate = formatDueDate(task.due_date);
+  const formattedCreatedDate = formatCreatedDate(task.created_at);
+
+  console.log("API due_date:", task.due_date); // Para debugging
+  console.log("Formatted due_date:", formattedDueDate); // Para debugging
 
   const deleteButton =
     task.status === "completada"
@@ -280,31 +318,33 @@ function createTaskElement(task) {
       : "";
 
   div.innerHTML = `
-    <div class="card h-100">
-      <div class="card-header">
-        <span class="badge ${statusClass} status-badge" 
-              style="cursor: pointer;" 
-              onclick="openStatusModal(${task.id}, '${task.status}')">
-          ${task.status}
-        </span>
+      <div class="card h-100">
+          <div class="card-header">
+              <span class="badge ${statusClass} status-badge" 
+                    style="cursor: pointer;" 
+                    onclick="openStatusModal(${task.id}, '${task.status}')">
+                  ${task.status}
+              </span>
+          </div>
+          <div class="card-body">
+              <h5 class="card-title">${escapeHtml(task.title)}</h5>
+              <p class="card-text">${escapeHtml(task.description || "")}</p>
+              <div class="task-dates">
+                  <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
+                  <small class="text-muted">Vence: ${formattedDueDate}</small>
+              </div>
+          </div>
+          <div class="card-footer bg-transparent">
+              <div class="d-flex justify-content-end gap-2">
+                  <button onclick="editTask(${
+                    task.id
+                  })" class="btn btn-sm btn-primary">
+                      <i class="fas fa-edit"></i> Editar
+                  </button>
+                  ${deleteButton}
+              </div>
+          </div>
       </div>
-      <div class="card-body">
-        <h5 class="card-title">${escapeHtml(task.title)}</h5>
-        <p class="card-text">${escapeHtml(task.description || "")}</p>
-        <div class="task-dates">
-          <small class="text-muted">Creada: ${formattedCreatedDate}</small><br>
-          <small class="text-muted">Vence: ${formattedDueDate}</small>
-        </div>
-      </div>
-      <div class="card-footer bg-transparent">
-        <div class="d-flex justify-content-end gap-2">
-          <button onclick="editTask(${task.id})" class="btn btn-sm btn-primary">
-            <i class="fas fa-edit"></i> Editar
-          </button>
-          ${deleteButton}
-        </div>
-      </div>
-    </div>
   `;
   return div;
 }
@@ -328,9 +368,13 @@ function addPaginationControls(response) {
       ${response.links
         .map(
           (link) => `
-            <li class="page-item ${link.active ? "active" : ""} ${!link.url ? "disabled" : ""}">
+            <li class="page-item ${link.active ? "active" : ""} ${
+            !link.url ? "disabled" : ""
+          }">
               <a class="page-link" href="#" 
-                 onclick="fetchTasks(${link.url ? link.url.split("page=")[1] : "1"}); return false;">
+                 onclick="fetchTasks(${
+                   link.url ? link.url.split("page=")[1] : "1"
+                 }); return false;">
                 ${link.label
                   .replace("&laquo;", "«")
                   .replace("&raquo;", "»")
@@ -354,4 +398,4 @@ function escapeHtml(unsafe) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
-}w
+}
